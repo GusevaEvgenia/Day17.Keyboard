@@ -1,24 +1,78 @@
 package com.android_lessons.belkin.day17keyboard;
 
 import android.app.AlertDialog;
+import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.WebChromeClient;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 
-public class MainActivity extends ActionBarActivity {
+
+public class MainActivity extends ListActivity implements AdapterView.OnItemLongClickListener{
 
     private static long back_pressed;
+
+    final String[] catNamesArray = new String[] { "Рыжик", "Барсик", "Мурзик",
+            "Мурка", "Васька", "Томасина", "Бобик", "Кристина", "Пушок",
+            "Дымка", "Кузя", "Китти", "Барбос", "Масяня", "Симба" };
+    private ArrayList<String> catNamesList = new ArrayList<>(Arrays.asList(catNamesArray));
+
+    private ArrayAdapter<String> mAdapter, mWeekOfDayAdapter;
+
+    private String[] mDayOfWeekArray = new String[] { "Понедельник", "Вторник", "Среда",
+            "Четверг", "Котопятница", "Субкота", "Воскресенье" };
+
+    private String mMonth, mDayOfWeek;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, catNamesList);
+        mWeekOfDayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mDayOfWeekArray);
+
+        setListAdapter(mAdapter);
+
+        getListView().setOnItemLongClickListener(this);
         setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
+        if (getListAdapter() == mAdapter) {
+            mMonth = (String) l.getItemAtPosition(position);
+            setListAdapter(mWeekOfDayAdapter);
+            mWeekOfDayAdapter.notifyDataSetChanged();
+        } else {
+            mDayOfWeek = (String) l.getItemAtPosition(position);
+            Toast.makeText(getBaseContext(), mMonth + ": " + mDayOfWeek, Toast.LENGTH_LONG).show();
+            setListAdapter(mAdapter);
+            mAdapter.notifyDataSetChanged();
+        }
+        //Toast.makeText(getApplicationContext(), "You choose " + l.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        String selectItem = parent.getItemAtPosition(position).toString();
+
+        mAdapter.remove(selectItem);
+        mAdapter.notifyDataSetChanged();
+
+        Toast.makeText(getApplicationContext(), selectItem + "deleted", Toast.LENGTH_SHORT).show();
+        return true;
     }
 
     @Override
